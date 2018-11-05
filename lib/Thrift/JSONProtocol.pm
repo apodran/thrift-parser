@@ -67,17 +67,17 @@ use constant {
 };
 
 my %_getTypeNameForTypeID = (
-    TType::BOOL   => NAME_BOOL,
-    TType::BYTE   => NAME_BYTE,
-    TType::I16    => NAME_I16,
-    TType::I32    => NAME_I32,
-    TType::I64    => NAME_I64,
-    TType::DOUBLE => NAME_DOUBLE,
-    TType::STRING => NAME_STRING,
-    TType::STRUCT => NAME_STRUCT,
-    TType::MAP    => NAME_MAP,
-    TType::SET    => NAME_SET,
-    TType::LIST   => NAME_LIST,
+    Thrift::TType::BOOL   => NAME_BOOL,
+    Thrift::TType::BYTE   => NAME_BYTE,
+    Thrift::TType::I16    => NAME_I16,
+    Thrift::TType::I32    => NAME_I32,
+    Thrift::TType::I64    => NAME_I64,
+    Thrift::TType::DOUBLE => NAME_DOUBLE,
+    Thrift::TType::STRING => NAME_STRING,
+    Thrift::TType::STRUCT => NAME_STRUCT,
+    Thrift::TType::MAP    => NAME_MAP,
+    Thrift::TType::SET    => NAME_SET,
+    Thrift::TType::LIST   => NAME_LIST,
 );
 
 ##
@@ -107,32 +107,32 @@ sub getTypeNameForTypeID {
     if (my $typeName = $_getTypeNameForTypeID{$typeID}) {
         return $typeName;
     }
-    die TProtocolException->new( "Unrecognized type $typeID", TProtocolException::UNKNOWN )
+    die Thrift::TProtocolException->new( "Unrecognized type $typeID", Thrift::TProtocolException::UNKNOWN )
 }
 
 sub getTypeIDForTypeName {
     my ($name) = @_;
-    my $result = TType::STOP;
+    my $result = Thrift::TType::STOP;
     my @name = split //, $name;
     if (int(@name) > 1) {
-            if ($name[0] eq 'd') { $result = TType::DOUBLE }
+            if ($name[0] eq 'd') { $result = Thrift::TType::DOUBLE }
         elsif ($name[0] eq 'i') {
-                if ($name[1] eq '8') { $result = TType::BYTE }
-            elsif ($name[1] eq '1') { $result = TType::I16 }
-            elsif ($name[1] eq '3') { $result = TType::I32 }
-            elsif ($name[1] eq '6') { $result = TType::I64 }
+                if ($name[1] eq '8') { $result = Thrift::TType::BYTE }
+            elsif ($name[1] eq '1') { $result = Thrift::TType::I16 }
+            elsif ($name[1] eq '3') { $result = Thrift::TType::I32 }
+            elsif ($name[1] eq '6') { $result = Thrift::TType::I64 }
         }
-        elsif ($name[0] eq 'l') { $result = TType::LIST   }
-        elsif ($name[0] eq 'm') { $result = TType::MAP    }
-        elsif ($name[0] eq 'r') { $result = TType::STRUCT }
+        elsif ($name[0] eq 'l') { $result = Thrift::TType::LIST   }
+        elsif ($name[0] eq 'm') { $result = Thrift::TType::MAP    }
+        elsif ($name[0] eq 'r') { $result = Thrift::TType::STRUCT }
         elsif ($name[0] eq 's') {
-                if ($name[1] eq 't') { $result = TType::STRING }
-            elsif ($name[1] eq 'e') { $result = TType::SET }
+                if ($name[1] eq 't') { $result = Thrift::TType::STRING }
+            elsif ($name[1] eq 'e') { $result = Thrift::TType::SET }
         }
-        elsif ($name[0] eq 't') { $result = TType::BOOL }
+        elsif ($name[0] eq 't') { $result = Thrift::TType::BOOL }
     }
-    if ($result == TType::STOP) {
-        die TProtocolException->new("Unrecognized type", TProtocolException::UNKNOWN);
+    if ($result == Thrift::TType::STOP) {
+        die Thrift::TProtocolException->new("Unrecognized type", Thrift::TProtocolException::UNKNOWN);
     }
     return $result;
 }
@@ -172,7 +172,7 @@ sub readJSONSyntaxChar {
     my ($self, $expected) = @_;
     my $got = $self->{reader_}->read();
     if ($got ne $expected) {
-        die TProtocolException->new("Unexpected character: $got", TProtocolException::INVALID_DATA);
+        die Thrift::TProtocolException->new("Unexpected character: $got", Thrift::TProtocolException::INVALID_DATA);
     }
     return length $got;
 }
@@ -262,7 +262,7 @@ sub readJSONString {
             else {
                 my $off = index ESCAPE_CHARS, $ch;
                 if ($off == -1) {
-                    die TProtocolException->new("Expected control char, got '$ch'", TProtocolException::INVALID_DATA);
+                    die Thrift::TProtocolException->new("Expected control char, got '$ch'", Thrift::TProtocolException::INVALID_DATA);
                 }
                 $ch = ESCAPE_CHAR_VALS->[$off];
             }
@@ -307,7 +307,7 @@ sub readJSONNumericChars {
             $ch = $self->reader_->peek();
         };
         if (my $ex = $@) {
-            if ($ex->isa('TTransportException') && $ex->{code} == TTransportException::END_OF_FILE) {
+            if ($ex->isa('TTransportException') && $ex->{code} == Thrift::TTransportException::END_OF_FILE) {
                 last;
             }
             die $ex;
@@ -367,9 +367,9 @@ sub readJSONDouble {
         my $special = $str =~ m{^-?(N|I)} ? 1 : 0;
         if (! $self->context_->escapeNum && ! $special) {
             # Throw exception -- we should not be in a string in this case
-            die TProtocolException->new(
+            die Thrift::TProtocolException->new(
                 "Numeric data unexpectedly quoted",
-                TProtocolException::INVALID_DATA,
+                Thrift::TProtocolException::INVALID_DATA,
             );
         }
         $$dub = $str;
@@ -497,7 +497,7 @@ sub readMessageBegin {
     $xfer += $self->readJSONInteger(\$version);
 
     if ($version != VERSION) {
-        die TProtocolException->new("Message contained bad version.", TProtocolException::BAD_VERSION);
+        die Thrift::TProtocolException->new("Message contained bad version.", Thrift::TProtocolException::BAD_VERSION);
     }
 
     $xfer += $self->readJSONString($name);
@@ -551,7 +551,7 @@ sub readFieldBegin {
     my $xfer = 0;
     my $ch = $self->reader_->peek();
     if ($ch eq RBRACE) {
-        $$fieldType = TType::STOP;
+        $$fieldType = Thrift::TType::STOP;
     }
     else {
         $xfer += $self->readJSONInteger($fieldId);
@@ -758,7 +758,7 @@ sub readBinary {
 
     use strict;
     use warnings;
-    use base qw(TProtocolFactory);
+    use base qw(Thrift::TProtocolFactory);
 
     sub getProtocol {
         my ($self, $transport) = @_;
