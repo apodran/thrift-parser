@@ -21,6 +21,7 @@ use warnings;
 use Thrift;
 use Thrift::Protocol;
 use base qw(Thrift::Protocol Class::Accessor);
+use version 0.77; our $VERSION = version->declare("$Thrift::VERSION");
 
 use utf8;
 use Encode;
@@ -346,7 +347,7 @@ sub writeJSONDouble {
     my $str = $num . '';
     check_utf8(\$str);
     my $special = $str =~ m{^-?(N|I)} ? 1 : 0;
-    my $escapeNum = $special || $self->context_->escapeNum; 
+    my $escapeNum = $special || $self->context_->escapeNum;
 
     $xfer += $self->write(QUOTE) if $escapeNum;
     $xfer += $self->write($str);
@@ -477,7 +478,7 @@ sub writeMessageBegin {
     my ($self, $name, $type, $seqid) = @_;
 
     check_utf8(\$name);
-    
+
     my $xfer = 0;
     $xfer += $self->writeJSONArrayStart();
     $xfer += $self->writeJSONInteger(VERSION);
