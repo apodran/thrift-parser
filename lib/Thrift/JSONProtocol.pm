@@ -19,6 +19,8 @@ Please see the C++ class header for a detailed description of the protocol's wir
 use strict;
 use warnings;
 use Thrift;
+use Thrift::Exception;
+use Thrift::Transport;
 use Thrift::Protocol;
 use base qw(Thrift::Protocol Class::Accessor);
 use version 0.77; our $VERSION = version->declare("$Thrift::VERSION");
